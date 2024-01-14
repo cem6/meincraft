@@ -3,4 +3,12 @@ project(meincraft)
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_executable(meincraft main.cpp)
+add_executable(meincraft
+        main.cpp
+        glad.c
+)
+
+target_link_libraries(meincraft
+        glfw
+        GL
+)

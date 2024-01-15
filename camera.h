@@ -13,13 +13,14 @@ enum Camera_Movement {
     LEFT,
     RIGHT,
     UP,
-    DOWN
+    DOWN,
+    SPRINT
 };
 
 // default values
-const float YAW = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
+const float YAW = 0.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a action vector pointing to the right so we initially rotate a bit to the left.
 const float PITCH =  0.0f;
-const float SPEED =  2.5f;
+const float SPEED =  5.0f;
 const float SENSITIVITY = 0.05f;
 const float ZOOM  =  70.0f;
 
@@ -40,7 +41,9 @@ public:
     float Zoom;
 
     // constructor vectors
-    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM) {
+    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH)
+        : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+    {
         Position = position;
         WorldUp = up;
         Yaw = yaw;
@@ -49,7 +52,9 @@ public:
     }
 
     // constructor scalars
-    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM) {
+    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch)
+        : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+    {
         Position = glm::vec3(posX, posY, posZ);
         WorldUp = glm::vec3(upX, upY, upZ);
         Yaw = yaw;
@@ -63,21 +68,26 @@ public:
     }
 
 
-    void ProcessKeyboard(Camera_Movement direction, float deltaTime) {
+    void ProcessKeyboard(Camera_Movement action, float deltaTime) {
         float velocity = MovementSpeed * deltaTime;
 
-        if (direction == FORWARD)
+        if (action == FORWARD)
             Position += Front * velocity;
-        if (direction == BACKWARD)
+        if (action == BACKWARD)
             Position -= Front * velocity;
-        if (direction == LEFT)
+        if (action == LEFT)
             Position -= Right * velocity;
-        if (direction == RIGHT)
+        if (action == RIGHT)
             Position += Right * velocity;
-        if (direction == UP)
+        if (action == UP)
             Position += Up * velocity;
-        if (direction == DOWN)
+        if (action == DOWN)
             Position -= Up * velocity;
+        
+        if (action == SPRINT)
+            MovementSpeed = SPEED * 3;
+        else
+            MovementSpeed = SPEED;
     }
 
     void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true) {
@@ -124,6 +134,9 @@ private:
         // also re-calculate the Right and Up vector
         Right = glm::normalize(glm::cross(Front, WorldUp));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
         Up    = glm::normalize(glm::cross(Right, Front));
+
+        // print camera position
+        std::cout << "Camera Position: " << Position.x << " " << Position.y << " " << Position.z << std::endl;
     }
 
 };

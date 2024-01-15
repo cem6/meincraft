@@ -8,6 +8,8 @@ add_executable(meincraft
         glad.c
         shader.h
         camera.h
+        block.h
+        texture.h
 )
 
 target_link_libraries(meincraft

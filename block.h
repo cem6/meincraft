@@ -82,7 +82,6 @@ public:
         // enable vertex attributes
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
-
     }
 
     ~Block()

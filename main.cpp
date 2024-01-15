@@ -18,6 +18,7 @@
 
 // TODO: chunk class
 // TODO: include texture in block class
+// TODO: improve perforamnce (fps drops to under 60 when more than 30x30x30 blocks are rendered)
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);  // register current mouse position
@@ -96,6 +97,11 @@ int main() {
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+        // fps
+        int fps = 1/deltaTime;  // glfw caps at 60 fps
+        glfwSetWindowTitle(window, std::to_string(fps).c_str());
+
+
         // input
         processInput(window);
 
@@ -109,6 +115,7 @@ int main() {
         // texture
         (int)glfwGetTime() % 2 == 0 ? texture0.use() : texture2.use();
 
+        // shader
         shader.use();
 
         // pass projection matrix to shader (has to be in render loop bc of zoom)
@@ -116,7 +123,7 @@ int main() {
         shader.setMat4("projection", projection);
 
         // TODO: leben nehmen (block class -> chunk class -> world class)
-        int size = 10;
+        int size = 30; // if >30 fps drops to under 60
         for (int x=0; x<size; x++)
         {
             for (int y=0; y<size; y++)
@@ -134,7 +141,7 @@ int main() {
                     glm::mat4 view = camera.GetViewMatrix();
                     shader.setMat4("view", view);
 
-                    // render boxes
+                    // render cube
                     block.draw();
                 }
             }
@@ -156,6 +163,10 @@ int main() {
     glfwTerminate();
     return 0;
 }
+
+
+
+
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 void processInput(GLFWwindow *window)
@@ -190,8 +201,6 @@ void processInput(GLFWwindow *window)
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         }
     }
-
-
 
 }
 

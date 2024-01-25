@@ -1,8 +1,7 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include "includes/glad.h"
-#include "includes/glm/glm.hpp"
+#include "settings.h"
 
 #include <string>
 #include <fstream>
@@ -163,5 +162,8 @@ private:
         }
     }
 };
+
+
+
 #endif
 

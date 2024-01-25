@@ -1,28 +1,28 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "includes/glad.h"
-#include "includes/glm/glm.hpp"
-#include "includes/glm/gtc/matrix_transform.hpp"
+#include "settings.h"
 
 #include <vector>
+#include <iostream>
+
 
 enum Camera_Movement {
     FORWARD,
     BACKWARD,
-    LEFT,
-    RIGHT,
+    LEFT_c,
+    RIGHT_c,
     UP,
     DOWN,
     SPRINT
 };
 
 // default values
-const float YAW = 0.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a action vector pointing to the right so we initially rotate a bit to the left.
+const float YAW = 90.0f;	// blabla: yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a action vector pointing to the right so we initially rotate a bit to the left.
 const float PITCH =  0.0f;
-const float SPEED =  5.0f;
+const float SPEED =  10.0f;
 const float SENSITIVITY = 0.05f;
-const float ZOOM  =  70.0f;
+const float ZOOM  =  70.0f; // max zoom out
 
 class Camera {
 public:
@@ -75,9 +75,9 @@ public:
             Position += Front * velocity;
         if (action == BACKWARD)
             Position -= Front * velocity;
-        if (action == LEFT)
+        if (action == LEFT_c)
             Position -= Right * velocity;
-        if (action == RIGHT)
+        if (action == RIGHT_c)
             Position += Right * velocity;
         if (action == UP)
             Position += Up * velocity;
@@ -85,9 +85,11 @@ public:
             Position -= Up * velocity;
         
         if (action == SPRINT)
-            MovementSpeed = SPEED * 3;
+            MovementSpeed = SPEED * 4;
         else
             MovementSpeed = SPEED;
+
+        std::cout << "Camera Position: " << (int)Position.x << " " << (int)Position.y << " " << (int)Position.z << std::endl;
     }
 
     void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true) {
@@ -110,15 +112,15 @@ public:
     }
 
     void ProcessMouseScroll(float yoffset) {
-        Zoom -= (float)yoffset*2;
-
-        std::cout << "Zoom: " << Zoom << std::endl;
+        Zoom -= (float)yoffset*4;
 
         // prevent zooming in or out too much
         if (Zoom < 1.0f)
             Zoom = 1.0f;
         if (Zoom > 70.0f)
             Zoom = 70.0f;
+
+        std::cout << "Zoom: " << Zoom << std::endl;
     }
 
 private:
@@ -134,11 +136,11 @@ private:
         // also re-calculate the Right and Up vector
         Right = glm::normalize(glm::cross(Front, WorldUp));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
         Up    = glm::normalize(glm::cross(Right, Front));
-
-        // print camera position
-        std::cout << "Camera Position: " << Position.x << " " << Position.y << " " << Position.z << std::endl;
     }
 
 };
+
+
+
 
 #endif // CAMERA_H

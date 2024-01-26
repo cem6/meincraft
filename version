@@ -1,17 +1,15 @@
-
-version 27 <br>
-    added bad demo of checking blocks of neighboring chunks for improved culling
-    TODO: improve neighbor chunk culling  
+version 27
+    TODO: convert local cords to global cords to check for adjacent blocks outside of own chunk during culling
     TODO: change grass side texture
 
-version 26 <br>
+version 26
     fixed texture atlas
 
-version 25 <br>
+version 25
     implemented texture atlas to keep using simple vbo with different block textures
     xTODO: every chunk but the first (or last??) gets wrong texture coordinates
 
-version 23 <br>
+version 23
     xTODO: blocktypes
     TODO: fix border faces of chunks being rendered
     TODO: lower initial loading time (std::arrays, rework functions, maybe multithreading)
@@ -19,16 +17,16 @@ version 23 <br>
     TEST: all vbos with one vao
         works, no visible performance increase, will still use
 
-version 22 <br>
+version 22
     hardcoded bad worlgen in game.h
     TODO: implement proper worldgen
     xTODO: check noise (creates circular pattern
 
 
-version 21 <br>
+version 21
     sigsegv in worldgen, render_chunk() cant access vao and ebo ID
 
-version 20 <br>
+version 20
     SEGFAULT SEGFAULT SEGFAULT SEGFAULT SEGFAULT SEGFAULT SEGFAULT SEGFAULT SEGFAULT SEGFAULT SEGFAULT SEGFAULT
     wollen sie wissen was das scheiss problem war geliebte freunde:
         ich habe mich zu sehr auf copilot verlassen und der dumme hurensohn hat einfach copy paste gemacht anstatt nachzudenken
@@ -43,41 +41,41 @@ version 20 <br>
     it will probably lead to greater social disruption and psychological suffering, and it may lead to increased physical suffering
     even in “advanced” countries.
 
-version 17 <br>
+version 17
     implemented "inefficient" culling
     xTODO: impelement world generation
 
-version 16+ <br>
+version 16+
     implemented proper textures with render pipeline classes (VAO, VBO, EBO)
     TODO irgendwann: clean up render pipeline classes (everything is public)
 
-version 16 <br>
+version 16
     moved hardcoded texture implementation in chunk.h
     xTODO: implement proper textures with render pipeline classes
 
-version 15 <br>
+version 15
     hardcoded texture implementation in game.h
 
-version 13 <br>
+version 13
     xTODO later: cullling
     xTODO later later: reimplement textures
     moved build_Chunk() and render_Chunk() to chunk.h, by proper use of pointers
 
-version 12_2_copy <br>
+version 12_2_copy
     5 days of work to get chunks working
     === going back to main branch
 
-version 9_copy <br>
+version 9_copy
     rendern mit:
         new_render(): einzelnen VAO, VBO, EBO objekten
         temp_render(): alles in einer funktion
 
-version 10 <br>
+version 10
     WAS ICH BRAUCHE UM NICHT MEINEN VERSTAND ZU VERLIEREN
         CHUNK
         MESHING (+CULLING)
 
-version 8 <br>
+version 8
     !!! only 1 vao per chunk !!!
     xTODO now:
         culling
@@ -85,7 +83,7 @@ version 8 <br>
     xTODO later:
         world generation
 
-version 7+ <br>
+version 7+
     !clean version
     working:
         window creation
@@ -96,22 +94,22 @@ version 7+ <br>
         chunks
         world generation
 
-version 7 <br>
+version 7
     cameracameracameracameracameracameracameracamera
 
-version 6 <br>
+version 6
     input, ...
     no camera
 
-version 5 <br>
+version 5
     textures
     no input, no camera
 
-version 4 <br>
+version 4
     3d cube render
     no texture, no camera movement
 
-version 3 <br>
+version 3
     empty window
 
 -- angefangen am 14.1.24 --

@@ -23,6 +23,11 @@ public: // TODO: make private
     std::vector<float> chunkTextureData = {};
     std::vector<int> chunkIndices = {};
 
+    std::vector<glm::vec3> leftBorder = {};
+    std::vector<glm::vec3> rightBorder = {};
+    std::vector<glm::vec3> frontBorder = {};
+    std::vector<glm::vec3> backBorder = {};
+
     static constexpr int chunkSize = 32;
     static constexpr int chunkHeight = 128;
     // ziel: 32 x 128 x 32
@@ -59,10 +64,12 @@ public:
     }
 
 
+
+
     // terrain generation
     void calculate_NoiseHeight(int x, int z)
     {
-        noiseHeight = noise.GetNoise((chunkPosition.x+x)/10, (chunkPosition.z+z)/10) * 200 + 5; // bei chunkHeight 128 bis zu *800 (*400 reicht)
+        noiseHeight = noise.GetNoise((chunkPosition.x+x)/10, (chunkPosition.z+z)/10) * 300 + 5; // bei chunkHeight 128 bis zu *800 (*400 reicht)
     }
 
     // new (terrain generation)
@@ -174,13 +181,85 @@ public:
         std::cout << "Faces picked" << std::endl;
     }
 
+
+
     void add_Face(Block block, Faces face) // problem: using last chunks chunkTextureData for every chunk
     {
-        // vertex data
-        std::vector<glm::vec3> faceVertexData = block.getFace(face);
-        chunkVertexData.insert(chunkVertexData.end(), faceVertexData.begin(), faceVertexData.end());
+
+        // TODO: if block is on border, add block to vector of border blocks, later compare chunks according to neighboring borders and dont add faces of border blocks that are not visible
+        // => have to do all of this outside of a single chunks class and somewhere where multiple chunks members can be compared
+
+        // Get the block's local coordinates within the chunk
+        int x = static_cast<int>(block.blockPosition.x - chunkPosition.x);
+        int y = static_cast<int>(block.blockPosition.y - chunkPosition.y);
+        int z = static_cast<int>(block.blockPosition.z - chunkPosition.z);
+
+        // Check if the block is on the border of the chunk
+        bool isOnLeftBorder = (x == 0);
+        bool isOnRightBorder = (x == chunkSize - 1);
+        // bool isOnBottomBorder = (y == 0);
+        // bool isOnTopBorder = (y == chunkHeight - 1);
+        bool isOnFrontBorder = (z == 0);
+        bool isOnBackBorder = (z == chunkSize - 1);
 
 
+
+        std::vector<glm::vec3> faceVertexData = block.getFace(face); // default
+        if (isOnLeftBorder && face == Faces::LEFT)
+        {
+            // translate local block coordinates to world coordinates
+            for (glm::vec3& vertex : faceVertexData)
+            {
+                vertex += chunkPosition;
+            }
+            // add to chunks left border vector
+            leftBorder.insert(leftBorder.end(), faceVertexData.begin(), faceVertexData.end());
+            return;
+        }
+        if (isOnRightBorder && face == Faces::RIGHT)
+        {
+            // translate local block coordinates to world coordinates
+            for (glm::vec3& vertex : faceVertexData)
+            {
+                vertex += chunkPosition;
+            }
+            // add to chunks right border vector
+            rightBorder.insert(rightBorder.end(), faceVertexData.begin(), faceVertexData.end());
+            return;
+        }
+        if (isOnFrontBorder && face == Faces::FRONT)
+        {
+            // translate local block coordinates to world coordinates
+            for (glm::vec3& vertex : faceVertexData)
+            {
+                vertex += chunkPosition;
+            }
+            // add to chunks front border vector
+            frontBorder.insert(frontBorder.end(), faceVertexData.begin(), faceVertexData.end());
+            return;
+        }
+        if (isOnBackBorder && face == Faces::BACK)
+        {
+            // translate local block coordinates to world coordinates
+            for (glm::vec3& vertex : faceVertexData)
+            {
+                vertex += chunkPosition;
+            }
+            // add to chunks back border vector
+            backBorder.insert(backBorder.end(), faceVertexData.begin(), faceVertexData.end());
+            return;
+        }
+
+
+
+        chunkVertexData.insert(chunkVertexData.end(), faceVertexData.begin(), faceVertexData.end()); // default // DO THIS AFTER COMPARING CHUNK BORDERS
+
+
+
+
+
+
+        // temporary grass texture data // TODO: implement properly
         if (block.type == BlockType::GRASS)
         {
             if (face == Faces::TOP) block.type = BlockType::GRASS_TOP;

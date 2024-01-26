@@ -47,8 +47,9 @@ public:
         glEnable(GL_DEPTH_TEST);    // enable depth testing so that objects in front will be drawn in front
         // glEnable(GL_DEBUG_OUTPUT); // enable debug output
 
+        // // kaputt  // TODO: fix
         // glEnable(GL_CULL_FACE);     // enable culling of faces
-        // glFrontFace(GL_CCW);         // front faces are clockwise
+        // glFrontFace(GL_CW);         // front faces are clockwise
         // glCullFace(GL_BACK);        // cull back faces
 
 

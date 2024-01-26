@@ -2,7 +2,7 @@
 #define WORLD_H
 
 #include "../settings.h"
-// #include "chunk.h"
+
 #include "NEWchunk.h"
 #include "../Graphics/VAO.h"
 
@@ -12,7 +12,7 @@ class World
 {
 public:
     VAO *vao;
-    static constexpr int s = 2; // procedural generation: always 16x16 chunks
+    static constexpr int s = 8; // procedural generation: always 8x8 chunks
     static constexpr int s_half = s/2;
     NEWChunk *chunkStorage[s][s];
 

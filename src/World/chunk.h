@@ -1,5 +1,5 @@
-#ifndef CHUNK_H
-#define CHUNK_H
+#ifndef NEWCHUNK_H
+#define NEWCHUNK_H
 
 #include "../settings.h"
 #include "../../includes/FastNoiseLite.h"
@@ -9,12 +9,14 @@
 #include "../Graphics/VBO.h"
 #include "../Graphics/EBO.h"
 
+static constexpr int chunkSize = 32;     // needed for world generation
+static constexpr int chunkHeight = 128;  // needed for world generation
+// ziel: 32 x 128 x 32
 
-
-class Chunk
+class NEWChunk
 {
 public: // TODO: make private
-    VAO *vao;
+    // VAO *vao;
     VBO *vbo;
     VBO *vbo_texture;
     EBO *ebo;
@@ -23,9 +25,10 @@ public: // TODO: make private
     std::vector<float> chunkTextureData = {};
     std::vector<int> chunkIndices = {};
 
-    static constexpr int chunkSize = 16;
-    static constexpr int chunkHeight = 320;
-    // ziel: 32 x 320 x 32
+    std::vector<glm::vec3> leftBorder = {};
+    std::vector<glm::vec3> rightBorder = {};
+    std::vector<glm::vec3> frontBorder = {};
+    std::vector<glm::vec3> backBorder = {};
 
     int indices_amount = 0;
     int faces_amount = 0;
@@ -37,32 +40,36 @@ public: // TODO: make private
     int noiseHeight;
 
 public:
-    glm::vec3 chunkPosition;
+    glm::vec3 position;
 
-    Chunk(glm::vec3 position)
-        : chunkPosition(position)
+    NEWChunk(glm::vec3 position, VAO vao)
+        : position(position)
     {
-        // noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
-        // noise.SetFractalType(FastNoiseLite::FractalType_FBm);
-        // noise.SetFractalOctaves(4);
-        // noise.SetFrequency(0.01f);
-        // noise.SetFractalLacunarity(2.0f);
-        // noise.SetFractalGain(0.5f);
+        // minecraft noise
+        noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+        noise.SetFractalType(FastNoiseLite::FractalType_FBm);
+        noise.SetFractalOctaves(6);
+        noise.SetFrequency(0.01f);
+        noise.SetFractalLacunarity(2.0f);
+        noise.SetFractalGain(0.5f);
 
-        // generate_Blocks();
+
         generate_Blocks();
 
         pick_Faces();
 
-        build_Chunk();
+        build_Chunk(vao);
     }
 
 
 
+
+    // terrain generation
     void calculate_NoiseHeight(int x, int z)
     {
-        noiseHeight = noise.GetNoise((chunkPosition.x+x)/10, (chunkPosition.z+z)/10) * 200 + 0;
+        noiseHeight = noise.GetNoise((position.x+x)/10, (position.z+z)/10) * 300 + 5; // bei chunkHeight 128 bis zu *800 (*400 reicht)
     }
+
     // new (terrain generation)
     void generate_Blocks() // add blocks to storage
     {
@@ -76,12 +83,15 @@ public:
 
                     if (y < noiseHeight) // terrain generation
                     {
-                        block = new Block(chunkPosition + glm::vec3(x, y, z), BlockType::DIRT);
+                        if (y == noiseHeight -1) block = new Block(position + glm::vec3(x, y, z), BlockType::GRASS);
+                        else if (y > noiseHeight -6) block = new Block(position + glm::vec3(x, y, z), BlockType::DIRT);
+                        else block = new Block(position + glm::vec3(x, y, z), BlockType::STONE);
+
                         blockStorage_a[x][y][z] = block;
                     }
                     else
                     {
-                        block = new Block(chunkPosition + glm::vec3(x, y, z), BlockType::EMPTY);
+                        block = new Block(position + glm::vec3(x, y, z), BlockType::EMPTY);
                         blockStorage_a[x][y][z] = block;
                     }
 
@@ -112,10 +122,7 @@ public:
                             add_Face(*blockStorage_a[x][y][z], Faces::LEFT);
                         }
                     }
-                    else // furthest left is always added
-                    {
-                        add_Face(*blockStorage_a[x][y][z], Faces::LEFT);
-                    }
+                    else add_Face(*blockStorage_a[x][y][z], Faces::LEFT); // furthest left is always added
                     // right face (when block to the right is empty)
                     if (x<chunkSize-1)
                     {
@@ -124,10 +131,7 @@ public:
                             add_Face(*blockStorage_a[x][y][z], Faces::RIGHT);
                         }
                     }
-                    else // furthest right is always added
-                    {
-                        add_Face(*blockStorage_a[x][y][z], Faces::RIGHT);
-                    }
+                    else add_Face(*blockStorage_a[x][y][z], Faces::RIGHT); // furthest right is always added
 
                     // top face (when block above is empty)
                     if (y<noiseHeight-1) // terrain generation
@@ -137,10 +141,7 @@ public:
                             add_Face(*blockStorage_a[x][y][z], Faces::TOP);
                         }
                     }
-                    else // top is always added
-                    {
-                        add_Face(*blockStorage_a[x][y][z], Faces::TOP);
-                    }
+                    else add_Face(*blockStorage_a[x][y][z], Faces::TOP); // top is always added
                     // bottom face (when block below is empty)
                     if (y>0)
                     {
@@ -149,10 +150,7 @@ public:
                             add_Face(*blockStorage_a[x][y][z], Faces::BOTTOM);
                         }
                     }
-                    else // bottom is always added
-                    {
-                        add_Face(*blockStorage_a[x][y][z], Faces::BOTTOM);
-                    }
+                    else add_Face(*blockStorage_a[x][y][z], Faces::BOTTOM); // bottom is always added
 
                     // front face (when block in front is empty)
                     if (z<chunkSize-1)
@@ -162,10 +160,7 @@ public:
                             add_Face(*blockStorage_a[x][y][z], Faces::FRONT);
                         }
                     }
-                    else // front is always added
-                    {
-                        add_Face(*blockStorage_a[x][y][z], Faces::FRONT);
-                    }
+                    else  add_Face(*blockStorage_a[x][y][z], Faces::FRONT); // front is always added
                     // back face (when block behind is empty)
                     if (z>0)
                     {
@@ -174,10 +169,7 @@ public:
                             add_Face(*blockStorage_a[x][y][z], Faces::BACK);
                         }
                     }
-                    else // back is always added
-                    {
-                        add_Face(*blockStorage_a[x][y][z], Faces::BACK);
-                    }
+                    else add_Face(*blockStorage_a[x][y][z], Faces::BACK); // back is always added
                     // --- culling culling culling culling culling culling culling ---
 
                     generate_Indices(faces_amount);
@@ -187,17 +179,97 @@ public:
         std::cout << "Faces picked" << std::endl;
     }
 
-    void add_Face(Block block, Faces face)
-    {
-        // vertex data
-        std::vector<glm::vec3> faceVertexData = block.getFace(face);
-        chunkVertexData.insert(chunkVertexData.end(), faceVertexData.begin(), faceVertexData.end());
 
-        // texture data
-        chunkTextureData.insert(chunkTextureData.end(), textureData.begin(), textureData.end()); // i think the orientation is wrong
+
+    void add_Face(Block block, Faces face) // problem: using last chunks chunkTextureData for every chunk
+    {
+
+        // TODO: if block is on border, add block to vector of border blocks, later compare chunks according to neighboring borders and dont add faces of border blocks that are not visible
+        // => have to do all of this outside of a single chunks class and somewhere where multiple chunks members can be compared
+        //
+        // // Get the block's local coordinates within the chunk
+        // int x = static_cast<int>(block.blockPosition.x - chunkPosition.x);
+        // int y = static_cast<int>(block.blockPosition.y - chunkPosition.y);
+        // int z = static_cast<int>(block.blockPosition.z - chunkPosition.z);
+        //
+        // // Check if the block is on the border of the chunk
+        // bool isOnLeftBorder = (x == 0);
+        // bool isOnRightBorder = (x == chunkSize - 1);
+        // // bool isOnBottomBorder = (y == 0);
+        // // bool isOnTopBorder = (y == chunkHeight - 1);
+        // bool isOnFrontBorder = (z == 0);
+        // bool isOnBackBorder = (z == chunkSize - 1);
+
+
+
+        std::vector<glm::vec3> faceVertexData = block.getFace(face); // default
+        // if (isOnLeftBorder && face == Faces::LEFT)
+        // {
+        //     // translate local block coordinates to world coordinates
+        //     for (glm::vec3& vertex : faceVertexData)
+        //     {
+        //         vertex += chunkPosition;
+        //     }
+        //     // add to chunks left border vector
+        //     leftBorder.insert(leftBorder.end(), faceVertexData.begin(), faceVertexData.end());
+        //     return;
+        // }
+        // if (isOnRightBorder && face == Faces::RIGHT)
+        // {
+        //     // translate local block coordinates to world coordinates
+        //     for (glm::vec3& vertex : faceVertexData)
+        //     {
+        //         vertex += chunkPosition;
+        //     }
+        //     // add to chunks right border vector
+        //     rightBorder.insert(rightBorder.end(), faceVertexData.begin(), faceVertexData.end());
+        //     return;
+        // }
+        // if (isOnFrontBorder && face == Faces::FRONT)
+        // {
+        //     // translate local block coordinates to world coordinates
+        //     for (glm::vec3& vertex : faceVertexData)
+        //     {
+        //         vertex += chunkPosition;
+        //     }
+        //     // add to chunks front border vector
+        //     frontBorder.insert(frontBorder.end(), faceVertexData.begin(), faceVertexData.end());
+        //     return;
+        // }
+        // if (isOnBackBorder && face == Faces::BACK)
+        // {
+        //     // translate local block coordinates to world coordinates
+        //     for (glm::vec3& vertex : faceVertexData)
+        //     {
+        //         vertex += chunkPosition;
+        //     }
+        //     // add to chunks back border vector
+        //     backBorder.insert(backBorder.end(), faceVertexData.begin(), faceVertexData.end());
+        //     return;
+        // }
+
+
+        chunkVertexData.insert(chunkVertexData.end(), faceVertexData.begin(), faceVertexData.end()); // default // DO THIS AFTER COMPARING CHUNK BORDERS
+
+
+
+
+
+
+        // temporary grass texture data // TODO: implement properly
+        if (block.type == BlockType::GRASS)
+        {
+            if (face == Faces::TOP) block.type = BlockType::GRASS_TOP;
+            else if (face == Faces::BOTTOM) block.type = BlockType::DIRT;
+            else block.type = BlockType::GRASS;
+        }
+
+        std::vector<float> faceTextureData = block.getTexture(block.type);
+        chunkTextureData.insert(chunkTextureData.end(), faceTextureData.begin(), faceTextureData.end());
 
         faces_amount++; // ++ for every face, later used for indices
     }
+
 
     void generate_Indices(int faces_amount)
     {
@@ -220,108 +292,41 @@ public:
 
 
 
-    void build_Chunk() // render pipeline
+    void build_Chunk(VAO &vao) // render pipeline
     {
-        vao = new VAO();
-        vbo = new VBO(chunkVertexData, chunkTextureData, *vao);
+        // vao = new VAO();
+        vbo = new VBO(chunkVertexData, chunkTextureData, vao);
         ebo = new EBO(chunkIndices);
     }
-    void render_Chunk() // normal
+    void render_Chunk(VAO &vao) // normal
     {
-        std::cout << "rendering chunk " << vao->m_ID << std::endl;
-        glBindVertexArray(vao->m_ID); // bind the vertex array object
+        vbo->bindVBO();
+        vao.linktoVBO(0, 3); // vertex data // has to be done every frame because chunks have different positions
+        vbo->createTextureVBO(chunkTextureData, vao);
+
+        // glBindVertexArray(vao.m_ID); // bind the vertex array object // can now be done in render_World()
         // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo->m_ID); // ??? works without ??? // bind the buffer to the GL_ELEMENT_ARRAY_BUFFER target
         glDrawElements(GL_TRIANGLES, static_cast<int>(chunkIndices.size()), GL_UNSIGNED_INT, 0); // draw the rectangle
+
+        vbo->unbindVBO();
     }
 
-    // void render_Chunk() // debug
-    // {
-    //     std::cout << "rendering chunk " << std::endl;
-    //
-    //     // error check
-    //     GLenum error = glGetError();
-    //     if (error != GL_NO_ERROR)
-    //     {
-    //         std::cout << "OpenGL Error: " << error << std::endl;
-    //     }
-    //
-    //     std::cout << "vao: " << vao->m_ID << std::endl; // TODO: fix (cant access vao->m_ID)
-    //     glBindVertexArray(vao->m_ID); // bind the vertex array object
-    //     std::cout << "vao bound" << std::endl;
-    //
-    //     std::cout << "ebo: " << ebo->m_ID << std::endl; // TODO: fix (cant access ebo->m_ID)
-    //     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo->m_ID); // ??? works without ??? // bind the buffer to the GL_ELEMENT_ARRAY_BUFFER target
-    //     std::cout << "ebo bound" << std::endl;
-    //
-    //     glDrawElements(GL_TRIANGLES, static_cast<int>(chunkIndices.size()), GL_UNSIGNED_INT, nullptr); // draw the rectangle
-    //     std::cout << "elements drawn\n---" << std::endl;
-    // }
-
-
-/* ---------------------------------------- RENDER PIPELINE HARDCODED ---------------------------------------- */
-    // unsigned int VAO_HARD, VBO_HARD, texture_VBO_HARD, EBO_HARD;
-    // void build_Chunk() // DEBUG HAAAAARRRDDD
-    // {
-    //     glGenVertexArrays(1, &VAO_HARD);
-    //     glBindVertexArray(VAO_HARD);
-    //     std::cout << "VAO: " << VAO_HARD << std::endl;
-    //
-    //     glGenBuffers(1, &VBO_HARD);
-    //     glGenBuffers(1, &texture_VBO_HARD);
-    //     // vertex data
-    //     glBindBuffer(GL_ARRAY_BUFFER, VBO_HARD);
-    //     glBufferData(GL_ARRAY_BUFFER, chunkVertexData.size() * sizeof(glm::vec3), &chunkVertexData[0], GL_STATIC_DRAW);
-    //     // link
-    //     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    //     glEnableVertexAttribArray(0);
-    //     std::cout << "VBO: " << VBO_HARD << std::endl;
-    //     // texture data
-    //     glBindBuffer(GL_ARRAY_BUFFER, texture_VBO_HARD);
-    //     glBufferData(GL_ARRAY_BUFFER, chunkTextureData.size() * sizeof(float), &chunkTextureData[0], GL_STATIC_DRAW);
-    //     // link
-    //     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    //     glEnableVertexAttribArray(1);
-    //     std::cout << "texture VBO: " << texture_VBO_HARD << std::endl;
-    //
-    //     glGenBuffers(1, &EBO_HARD);
-    //     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_HARD);
-    //     glBufferData(GL_ELEMENT_ARRAY_BUFFER, chunkIndices.size() * sizeof(int), &chunkIndices[0], GL_STATIC_DRAW);
-    //     std::cout << "EBO: " << EBO_HARD << std::endl;
-    //     std::cout << "Chunk built" << std::endl;
-    // }
-    // void render_Chunk() // DEBUG HAAAAARRRDDD
-    // {
-    //     std::cout << "rendering chunk " << std::endl;
-    //
-    //     // error check
-    //     GLenum error = glGetError();
-    //     if (error != GL_NO_ERROR)
-    //     {
-    //         std::cout << "OpenGL Error: " << error << std::endl;
-    //     }
-    //
-    //     std::cout << "vao: " << VAO_HARD << std::endl; // TODO: fix (cant access vao->m_ID)
-    //     glBindVertexArray(VAO_HARD); // bind the vertex array object
-    //     std::cout << "vao bound" << std::endl;
-    //
-    //     std::cout << "ebo: " << EBO_HARD << std::endl; // TODO: fix (cant access ebo->m_ID)
-    //     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_HARD); // ??? works without ??? // bind the buffer to the GL_ELEMENT_ARRAY_BUFFER target
-    //     std::cout << "ebo bound" << std::endl;
-    //
-    //     glDrawElements(GL_TRIANGLES, static_cast<int>(chunkIndices.size()), GL_UNSIGNED_INT, nullptr); // draw the rectangle
-    //     std::cout << "chunk drawn\n---" << std::endl;
-    // }
-/* ---------------------------------------- RENDER PIPELINE HARDCODED ---------------------------------------- */
-
-
-    // not necessary
-    void delete_data() const
+    void load(VAO vao)
     {
-        glDeleteVertexArrays(1, &vao->m_ID);
-        glDeleteBuffers(1, &vbo->m_ID);
-        glDeleteBuffers(1, &vbo_texture->m_ID);
-        glDeleteBuffers(1, &ebo->m_ID);
+        vbo->bindVBO();
+        vbo->createTextureVBO(chunkTextureData, vao);
+        vbo->unbindVBO();
+        std::cout << "Chunk loaded" << std::endl;
     }
+
+    void unload(VAO vao)
+    {
+        vbo->bindVBO();
+        vbo->createTextureVBO(chunkTextureData, vao);
+        vbo->unbindVBO();
+        std::cout << "Chunk unloaded" << std::endl;
+    }
+
 
 };
 

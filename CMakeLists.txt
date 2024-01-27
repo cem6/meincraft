@@ -20,7 +20,7 @@ add_executable(meincraft03
 
         src/World/block.h
         src/World/chunk.h
-        src/World/NEWchunk.h
+        src/World/chunk.h
         includes/FastNoiseLite.h
         src/World/world.h
 )

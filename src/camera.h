@@ -24,10 +24,11 @@ const float SPEED =  10.0f;
 const float SENSITIVITY = 0.05f;
 const float ZOOM  =  70.0f; // max zoom out
 
+
 class Camera {
 public:
 
-    glm::vec3 Position;
+    glm::vec3 Position; // needed for chunk loading/unloading
     glm::vec3 Front;
     glm::vec3 Up;
     glm::vec3 Right;

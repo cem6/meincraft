@@ -1,5 +1,6 @@
 
 version 27 <br>
+![1.png](screenshots%2F1.png)
     added bad demo of checking blocks of neighboring chunks for improved culling
     TODO: improve neighbor chunk culling  
     TODO: change grass side texture

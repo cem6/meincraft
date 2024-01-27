@@ -48,6 +48,7 @@ public:
         shader->use(); // == (*shader).use(); //
         shader->setInt("texture1", 0); // texture unit 0
 
+        atlas->use();
 
         std::cout << "Game started" << std::endl;
     }
@@ -62,16 +63,7 @@ public:
 
     void renderloop()
     {
-
-
-
-
         World world;
-
-
-
-
-
 
         while (!glfwWindowShouldClose(p_win))
         {
@@ -105,10 +97,7 @@ public:
             shader->setMat4("projection", projection);
 
 
-
-            // textureWhite->use();
-            atlas->use();
-            // textureWolf->use();
+            // world.load_Chunk(camera.Position);
 
             world.render();
 
@@ -120,6 +109,7 @@ public:
             // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
             glfwSwapBuffers(p_win);
             glfwPollEvents();
+            glFinish(); // ???
         }
 
         // // not necessary

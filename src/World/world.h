@@ -31,12 +31,13 @@ public:
         {
             for (int z=0; z<s; z++)
             {
-                chunk = new NEWChunk(glm::vec3(32*x, 0, 32*z), *vao);
+                chunk = new NEWChunk(glm::vec3(32*x, 0, 32*z), *vao);  // chunksize 32, y, 32
                 chunkList.push_back(*chunk);
             }
         }
     }
 
+    // TODO: besser machen
     void render()
     {
         glBindVertexArray(vao->m_ID);

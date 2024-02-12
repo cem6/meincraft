@@ -28,7 +28,6 @@ class Game
 private:
     Shader *shader;
     Texture *textureWhite;
-    Texture *textureWolf;
     Texture *atlas;
 
 
@@ -41,7 +40,6 @@ public:
         glfwSetScrollCallback(p_win, scroll_callback);
 
         textureWhite = new Texture("../textures/texture_B.png");
-        textureWolf = new Texture("../textures/wolf.jpg");
         atlas = new Texture("../textures/0atlas.png");
 
         shader = new Shader("../shaders/vertex.shader", "../shaders/fragment.shader"); // sollte eigentlich global sein
